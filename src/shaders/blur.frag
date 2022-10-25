@@ -1,4 +1,4 @@
-uniform int blurRes = 25;
+uniform int blurRes = 5;
 uniform int blurRadius = 30;
 uniform int blurStep = 5;
 uniform vec2 imageSize;
