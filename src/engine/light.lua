@@ -23,6 +23,10 @@ function light:draw(x, y, z, color, occ, norm, spec)
 
     -- occlusion variables
     shaders.light:send("occluders", occ)
+    shaders.light:send("normalMap", norm)
+    shaders.light:send("spectralMap", spec)
+
+    shaders.light:send("resolution", {love.graphics.getWidth(), love.graphics.getHeight()})
     shaders.light:send("radius", scaledRadius)
     shaders.light:send("w", occ:getWidth())
     shaders.light:send("h", occ:getHeight())

@@ -31,15 +31,26 @@ function world:newTextureTemplate(name, ...)
     self.textureTemplates[name] = lighting.texture(...)
 end
 
+-- scale a texture template
+function world:setTextureTemplateScale(name, x, y)
+    self.textureTemplates[name]:setScale(x, y)
+end
+
 -- renders static texture
-function world:renderStaticTexture(name, x, y)
+function world:renderTextureStatic(name, x, y)
 
-    -- static render to all buffers
-
+    -- render texture to static buffers
+    self.textureTemplates[name]:draw(x, y, 
+                                     self.staticBuffers.texture,
+                                     self.staticBuffers.normal,
+                                     self.staticBuffers.occlusion,
+                                     self.staticBuffers.spectral
+                                    )
+    
 end
 
 -- renders non-static texture
-function world:renderDynamicTexture(name, x, y)
+function world:renderTextureDynamic(name, x, y)
 
     -- temp render to all buffers
 
@@ -82,34 +93,41 @@ function world:changeLightTemplate(id, template)
 end
 
 function world:update(dt)
+    -- render textures
+    self.dynamicBuffers.texture:renderTo(function() 
+        love.graphics.clear(1, 1, 1, 1)
+
+        love.graphics.draw(self.staticBuffers.texture)
+    end)
 
     -- render occlusion
     self.dynamicBuffers.occlusion:renderTo(function() 
         love.graphics.clear(0, 0, 0, 0)
 
-        love.graphics.setColor(1, 1, 0.5, 1)
-
-        love.graphics.rectangle("fill", 100, 100, 80, 80)
-        love.graphics.circle("fill", 400, 200, 40)
-
-        love.graphics.setColor(1, 1, 1, 1)
+        love.graphics.draw(self.staticBuffers.occlusion)
 
     end)
 
     -- render normals
     self.dynamicBuffers.normal:renderTo(function() 
         love.graphics.clear(0, 0, 0, 0)
+
+        love.graphics.draw(self.staticBuffers.normal)
     end)
 
     -- render spectral map
     self.dynamicBuffers.spectral:renderTo(function() 
         love.graphics.clear(0, 0, 0, 0)
+
+        love.graphics.draw(self.staticBuffers.spectral)
     end)
 
     -- render lighting buffer
     self.dynamicBuffers.lighting:renderTo(function()
-        love.graphics.clear(0, 0, 0, 0)
-    
+        love.graphics.clear(0.1, 0.1, 0.2, 1)
+        
+        love.graphics.setBlendMode("screen")
+
         for id, l in pairs(self.lights) do
             self.lightTemplates[l.template]:draw(l.x, l.y, l.z, l.color, 
                 -- pass buffers to light
@@ -119,14 +137,20 @@ function world:update(dt)
             )
         end
 
+        love.graphics.setBlendMode("alpha")
     end)
 
     -- render screen buffer
     self.dynamicBuffers.screen:renderTo(function() 
         love.graphics.clear(0, 0, 0, 0)
+
+        love.graphics.draw(self.dynamicBuffers.texture)
+
+        love.graphics.setBlendMode("multiply", "premultiplied")
+
         love.graphics.draw(self.dynamicBuffers.lighting)
-        -- love.graphics.draw(self.dynamicBuffers.occlusion)
         
+        love.graphics.setBlendMode("alpha")
     end)
 
 

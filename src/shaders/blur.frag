@@ -1,6 +1,6 @@
-uniform int blurRes = 5;
-uniform int blurRadius = 30;
-uniform int blurStep = 5;
+uniform int blurRes = 15;
+uniform int blurRadius = 5;
+uniform int blurStep = 1;
 uniform vec2 imageSize;
 uniform float lightRadius;
 
