@@ -3,11 +3,10 @@ uniform Image occluders;
 uniform Image normalMap;
 uniform Image spectralMap;
 
-uniform float radius, w, h;
+uniform float radius;
 uniform vec3 position;
 uniform float zMax = 5;
 uniform vec2 resolution;
-
 
 // light properties
 uniform float smoothing = 1.5;
@@ -47,7 +46,7 @@ vec4 effect( vec4 color, Image tex, vec2 texture_coords, vec2 screen_coords ) {
                 // check if light ray sees anything
                 vec2 pos = (position.xy + vec2(-cos(theta) * s, -sin(theta) * s));
 
-                vec4 occluder = Texel(occluders, pos / vec2(w, h));
+                vec4 occluder = Texel(occluders, pos / resolution);
 
                 // calculate zdepth
                 float disZ = 1 - clamp(position.z - (occluder.z), -1, 1);
@@ -77,11 +76,6 @@ vec4 effect( vec4 color, Image tex, vec2 texture_coords, vec2 screen_coords ) {
             color.rgb *= ((dot(N, L)) * (occluder.r)) + (length(Spectral.rgb) * scalar);
         }
 	}
-
-    // light blocking
-    {
-        // if (position.z < occluder.z) return vec4(0);
-    }
 
     return color;
 }

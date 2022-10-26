@@ -93,6 +93,7 @@ function world:changeLightTemplate(id, template)
 end
 
 function world:update(dt)
+    
     -- render textures
     self.dynamicBuffers.texture:renderTo(function() 
         love.graphics.clear(1, 1, 1, 1)
@@ -128,8 +129,10 @@ function world:update(dt)
         
         love.graphics.setBlendMode("screen")
 
+        -- render lights
         for id, l in pairs(self.lights) do
             self.lightTemplates[l.template]:draw(l.x, l.y, l.z, l.color, 
+
                 -- pass buffers to light
                 self.dynamicBuffers.occlusion,
                 self.dynamicBuffers.normal,
@@ -146,9 +149,10 @@ function world:update(dt)
 
         love.graphics.draw(self.dynamicBuffers.texture)
 
+        -- multiply lighting buffer onto textures
         love.graphics.setBlendMode("multiply", "premultiplied")
 
-        love.graphics.draw(self.dynamicBuffers.lighting)
+            love.graphics.draw(self.dynamicBuffers.lighting)
         
         love.graphics.setBlendMode("alpha")
     end)

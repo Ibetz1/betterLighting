@@ -18,19 +18,21 @@ end
 
 -- render light
 function light:draw(x, y, z, color, occ, norm, spec)
-
-    local scaledRadius = self.radius * self.renderQuality
+    local scaledRadius = math.floor(self.radius * self.renderQuality)
 
     -- occlusion variables
     shaders.light:send("occluders", occ)
     shaders.light:send("normalMap", norm)
     shaders.light:send("spectralMap", spec)
 
-    shaders.light:send("resolution", {love.graphics.getWidth(), love.graphics.getHeight()})
+    shaders.light:send("resolution", {love.graphics.getWidth() * self.renderQuality, love.graphics.getHeight() * self.renderQuality})
     shaders.light:send("radius", scaledRadius)
-    shaders.light:send("w", occ:getWidth())
-    shaders.light:send("h", occ:getHeight())
-    shaders.light:send("position", {x, y, z})
+
+    -- get scaled position
+    local px = math.floor(x * self.renderQuality)
+    local py = math.floor(y * self.renderQuality)
+
+    shaders.light:send("position", {px, py, z})
     shaders.light:send("smoothing", self.smoothing)
     shaders.light:send("glow", self.glow)
 
@@ -47,8 +49,9 @@ function light:draw(x, y, z, color, occ, norm, spec)
         love.graphics.setColor(1, 1, 1, 1)
     end)
 
+    -- pass blur info
     shaders.blur:send("imageSize", {scaledRadius * 2, scaledRadius * 2})
-    shaders.blur:send("lightRadius", self.radius)
+    shaders.blur:send("lightRadius", scaledRadius)
 
     -- render post with blur
     self.postBuffer:renderTo(function()
@@ -61,11 +64,10 @@ function light:draw(x, y, z, color, occ, norm, spec)
         love.graphics.setShader()
     end)
 
-    love.graphics.scale(2 - self.renderQuality, 2 - self.renderQuality)
-
-    love.graphics.draw(self.postBuffer, x * (self.renderQuality) - scaledRadius, y * (self.renderQuality) - scaledRadius)
-
-    love.graphics.scale(1, 1)
+    -- draw post buffer
+    love.graphics.draw(self.postBuffer, 
+                       (px * 1 / self.renderQuality) - self.radius, (py * 1 / self.renderQuality) - self.radius, 
+                       0, 1 / self.renderQuality, 1 / self.renderQuality)
 end
 
 return light
